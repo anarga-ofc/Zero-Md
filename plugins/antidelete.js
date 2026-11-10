@@ -64,7 +64,7 @@ function makeCaption(sender, messageText) {
 module.exports = {
   name: 'antidelete',
 
-  onMessage: async (conn, msg) => {
+  onMessage: async (anarga, msg) => {
     if (!msg?.message || msg.key.fromMe) return;
 
     const keyId = msg.key.id;
@@ -129,7 +129,7 @@ module.exports = {
     }
   },
 
-  onDelete: async (conn, updates) => {
+  onDelete: async (anarga, updates) => {
     for (const update of updates) {
       const key = update?.key;
       if (!key?.id) continue;
@@ -169,40 +169,40 @@ module.exports = {
           };
 
           if (mediaPath.endsWith('.jpg')) {
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               image: { url: mediaPath },
               ...opts
             });
 
           } else if (mediaPath.endsWith('.mp4')) {
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               video: { url: mediaPath },
               ...opts
             });
 
           } else if (mediaPath.endsWith('.webp')) {
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               sticker: { url: mediaPath }
             });
 
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               text: caption,
               mentions: [sender]
             });
 
           } else if (mediaPath.endsWith('.ogg')) {
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               audio: { url: mediaPath },
               mimetype: 'audio/ogg; codecs=opus'
             });
 
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               text: caption,
               mentions: [sender]
             });
 
           } else {
-            await conn.sendMessage(from, {
+            await anarga.sendMessage(from, {
               document: { url: mediaPath },
               ...opts
             });
@@ -211,7 +211,7 @@ module.exports = {
           continue;
         }
 
-        await conn.sendMessage(from, {
+        await anarga.sendMessage(from, {
           text: caption,
           mentions: [sender]
         });
