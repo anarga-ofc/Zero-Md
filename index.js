@@ -4,6 +4,18 @@ const {
   DisconnectReason,
   jidNormalizedUser,
   getContentType,
+  proto,
+  generateWAMessageContent,
+  generateWAMessage,
+  AnyMessageContent,
+  prepareWAMessageMedia,
+  areJidsSameUser,
+  downloadContentFromMessage,
+  MessageRetryMap,
+  generateForwardMessageContent,
+  generateWAMessageFromContent,
+  generateMessageID, makeInMemoryStore,
+  jidDecode,
   fetchLatestBaileysVersion,
   Browsers
 } = require('@whiskeysockets/baileys');
@@ -62,8 +74,14 @@ async function ensureSessionFile() {
   }
 }
 
+
+const antiDeletePlugin = require('./plugins/antidelete.js');
+global.pluginHooks = global.pluginHooks || [];
+global.pluginHooks.push(antiDeletePlugin);
+
+
 async function connectToWA() {
-  console.log("Connecting Anarga-MD 🧬...");
+  console.log("Connecting anarga-MD 🧬...");
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -85,9 +103,9 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅ Anarga-MD connected to WhatsApp');
+      console.log('✅ anarga-MD connected to WhatsApp');
 
-      const up = `Zero-MD connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `anarga-MD connected ✅\n\nPREFIX: ${prefix}`;
       await anarga.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://github.com/anarga-ofc/Zero-Md/blob/main/lib/Menu-anrga.PNG?raw=true` },
         caption: up
@@ -112,14 +130,111 @@ async function connectToWA() {
 
     const mek = messages[0];
     if (!mek || !mek.message) return;
-
     mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
-    if (mek.key.remoteJid === 'status@broadcast') return;
+   
 
-    const m = sms(anarga, mek);
-    const type = getContentType(mek.message);
-    const from = mek.key.remoteJid;
-    const body = type === 'conversation' ? mek.message.conversation : mek.message[type]?.text || mek.message[type]?.caption || '';
+        if (global.pluginHooks) {
+      for (const plugin of global.pluginHooks) {
+        if (plugin.onMessage) {
+          try {
+            await plugin.onMessage(anarga, mek);
+          } catch (e) {
+            console.log("onMessage error:", e);
+          }
+        }
+      }
+    }
+ 
+    
+    
+if (mek.key?.remoteJid === 'status@broadcast') {
+  const senderJid = mek.key.participant || mek.key.remoteJid || "unknown@s.whatsapp.net";
+  const mentionJid = senderJid.includes("@s.whatsapp.net") ? senderJid : senderJid + "@s.whatsapp.net";
+
+  if (config.AUTO_STATUS_SEEN === "true") {
+    try {
+      await anarga.readMessages([mek.key]);
+      console.log(`[✓] Status seen: ${mek.key.id}`);
+    } catch (e) {
+      console.error("❌ Failed to mark status as seen:", e);
+    }
+  }
+
+  if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
+    try {
+      const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+      await anarga.sendMessage(mek.key.participant, {
+        react: {
+          text: randomEmoji,
+          key: mek.key,
+        }
+      });
+
+      console.log(`[✓] Reacted to status of ${mek.key.participant} with ${randomEmoji}`);
+    } catch (e) {
+      console.error("❌ Failed to react to status:", e);
+    }
+  }
+
+  if (mek.message?.extendedTextMessage && !mek.message.imageMessage && !mek.message.videoMessage) {
+    const text = mek.message.extendedTextMessage.text || "";
+    if (text.trim().length > 0) {
+      try {
+        await anarga.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+          text: `📝 *Text Status*\n👤 From: @${mentionJid.split("@")[0]}\n\n${text}`,
+          mentions: [mentionJid]
+        });
+        console.log(`✅ Text-only status from ${mentionJid} forwarded.`);
+      } catch (e) {
+        console.error("❌ Failed to forward text status:", e);
+      }
+    }
+  }
+
+  if (mek.message?.imageMessage || mek.message?.videoMessage) {
+    try {
+      const msgType = mek.message.imageMessage ? "imageMessage" : "videoMessage";
+      const mediaMsg = mek.message[msgType];
+
+      const stream = await downloadContentFromMessage(
+        mediaMsg,
+        msgType === "imageMessage" ? "image" : "video"
+      );
+
+      let buffer = Buffer.from([]);
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+      }
+
+      const mimetype = mediaMsg.mimetype || (msgType === "imageMessage" ? "image/jpeg" : "video/mp4");
+      const captionText = mediaMsg.caption || "";
+
+      await anarga.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+        [msgType === "imageMessage" ? "image" : "video"]: buffer,
+        mimetype,
+        caption: `📥 *Forwarded Status*\n👤 From: @${mentionJid.split("@")[0]}\n\n${captionText}`,
+        mentions: [mentionJid]
+      });
+
+      console.log(`✅ Media status from ${mentionJid} forwarded.`);
+    } catch (err) {
+      console.error("❌ Failed to download or forward media status:", err);
+    }
+  }
+}
+
+
+const m = sms(anarga, mek)
+const type = getContentType(mek.message)
+const content = JSON.stringify(mek.message)
+const from = mek.key.remoteJid
+const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
+    const body = (type === 'conversation') ? mek.message.conversation :
+      (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text :
+        (type == 'imageMessage' && mek.message.imageMessage.caption) ? mek.message.imageMessage.caption :
+          (type == 'videoMessage' && mek.message.videoMessage.caption) ? mek.message.videoMessage.caption : '';
     const isCmd = body.startsWith(prefix);
     const commandName = isCmd ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase() : '';
     const args = body.trim().split(/ +/).slice(1);
@@ -174,7 +289,24 @@ async function connectToWA() {
       }
     }
   });
+
+  
+  anarga.ev.on('messages.update', async (updates) => {
+    if (global.pluginHooks) {
+      for (const plugin of global.pluginHooks) {
+        if (plugin.onDelete) {
+          try {
+            await plugin.onDelete(anarga, updates);
+          } catch (e) {
+            console.log("onDelete error:", e);
+          }
+        }
+      }
+    }
+  });
 }
+
+
 
 ensureSessionFile();
 
