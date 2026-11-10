@@ -41,10 +41,13 @@ cmd(
       const now = new Date();
 
       const time = now.toLocaleTimeString("en-US", {
-        hour12: true
+        hour12: true,
+        timeZone: "Asia/Colombo"
       });
 
-      const date = now.toISOString().split("T")[0];
+      const date = now.toLocaleDateString("en-CA", {
+        timeZone: "Asia/Colombo"
+      });
 
       const categoryNames = Object.keys(categories);
 
@@ -70,7 +73,7 @@ cmd(
 ┃➤ 📌 *𝙿𝚁𝙴𝙵𝙸𝚇* : [.]
 ┃➤ 🎲 *𝙼𝙾𝙳𝙴* : [Private]
 ┃➤ 💻 *𝙿𝙻𝙰𝚃𝙵𝙾𝚁𝙼* : [${os.platform()}]
-┃➤ 📞 *𝙾𝚆𝙽𝙴𝚁 𝙽𝚄𝙼𝙱𝙴𝚁* : [94767467020]
+┃➤ 📞 *𝙾𝚆𝙽𝙴𝚁 𝙽𝚄𝙼𝙱𝙴𝚁* : [+94767467020]
 ┃➤ 💾 *𝚁𝙰𝙼* : [${usedRAM} MB / ${totalRAM} MB]
 ┃➤ ⏱️ *𝚄𝙿𝚃𝙸𝙼𝙴* : [${formattedUptime}]
 ┃➤ ⏰ *𝚃𝙸𝙼𝙴* : [${time}]
@@ -110,10 +113,21 @@ cmd(
 
       menuText += `\n©️ 𝟸𝟶𝟸𝟼 𝚉𝚎𝚛𝚘-𝚇 𝙼𝙳`;
 
-      await reply(menuText.trim());
+      // MENU IMAGE
+      const menuImage = "https://github.com/anarga-ofc/Zero-Md/blob/main/lib/Menu-anrga.PNG?raw=true";
+
+      // SEND IMAGE WITH MENU CAPTION
+      await anarga.sendMessage(
+        from,
+        {
+          image: { url: menuImage },
+          caption: menuText.trim()
+        },
+        { quoted: mek }
+      );
 
     } catch (err) {
-      console.error(err);
+      console.error("MENU ERROR:", err);
       reply("❌ Error generating menu.");
     }
   }
