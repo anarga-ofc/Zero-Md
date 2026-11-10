@@ -30,7 +30,7 @@ ALIVE_MSG: process.env.ALIVE_MSG || `👋 𝐇𝐈, *WΞLCΩMΞ TΩ USΞR* 𝐈�
 *╰──────────❖✦►*
 
 > ©️𝙳𝚎𝚟𝚎𝚕𝚘𝚙𝚎𝚛 𝚋𝚢 𝙰𝚗𝚊𝚛𝚐𝚊-𝕏`,
-BOT_OWNER: '94767467020',  // Replace with the owner's phone number
+BOT_OWNER: '+94767467020',  // Replace with the owner's phone number
 AUTO_STATUS_SEEN: 'true',
 AUTO_STATUS_REACT: 'true',
 
