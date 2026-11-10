@@ -1,12 +1,12 @@
 {
-  "name": "DANUWA-MD",
+  "name": "ZERO-MD",
   "version": "1.0.0",
   "description": "A Powerfull Whatsapp Bot",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name DANUWA-MD",
-    "stop": "pm2 stop DANUWA-MD",
-    "restart": "pm2 restart DANUWA-MD"
+    "start": "pm2 start index.js --deep-monitoring --attach --name ZERO-MD",
+    "stop": "pm2 stop ZERO-MD",
+    "restart": "pm2 restart ZERO-MD"
   },
  "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
