@@ -8,8 +8,8 @@
     "stop": "pm2 stop DANUWA-MD",
     "restart": "pm2 restart DANUWA-MD"
   },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.16",
+ "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "api-dylux": "^1.8.5",
     "axios": "^1.9.0",
     "browser-id3-writer": "^6.2.0",
