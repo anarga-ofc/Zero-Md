@@ -37,6 +37,7 @@
    "abir-photo360-apis": "^1.0.2",
    "puppeteer": "^25.17.0",
    "sadaslk-dlcore": "^1.0.0",
-   "yt-search": "^2.13.1"
+   "yt-search": "^2.13.1",
+   "@xaviabot/fb-downloader": "^1.0.14"
   }
 }
