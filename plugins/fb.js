@@ -11,7 +11,7 @@ cmd(
     filename: __filename,
   },
   async (
-    danuwa,
+    anarga,
     mek,
     m,
     {
@@ -63,7 +63,7 @@ Your fb video
 👻 *Quality*: ${qualityText}
 `;
 
-      await danuwa.sendMessage(
+      await anarga.sendMessage(
         from,
         {
           image: {
@@ -74,7 +74,7 @@ Your fb video
         { quoted: mek }
       );
 
-      await danuwa.sendMessage(
+      await anarga.sendMessage(
         from,
         {
           video: { url: bestQualityUrl },
