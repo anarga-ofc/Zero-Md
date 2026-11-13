@@ -5,7 +5,7 @@ function convertToBool(text, fault = 'true') {
     return text === fault ? true : false;
 }
 module.exports = {
-SESSION_ID: process.env.SESSION_ID || "X1Ay1RID#uCAjgtXe6q60ciKaQ4MVvo5riu0IQyBiIIp6UmL7HEw",
+SESSION_ID: process.env.SESSION_ID || "vwYQgI4S#5aWdbwfTgMUqAE0Mk4px45CLpLYtZPNvq7X7KsVkAJk",
 ALIVE_IMG: process.env.ALIVE_IMG || "https://github.com/anarga-ofc/Zero-Md/blob/main/lib/Menu-anrga.PNG?raw=true",
 ALIVE_MSG: process.env.ALIVE_MSG || `👋 𝐇𝐈, *WΞLCΩMΞ TΩ USΞR* 𝐈❜𝐀𝐌 𝐀𝐋𝐈𝐕𝐄 𝐍𝐎𝐖 👾
 
